@@ -1,68 +1,105 @@
+"""
+Este programa es una versión modificada del juego Conecta Cuatro encontrado en:
+https://github.com/KeithGalli/Connect4-Python
+El programa original fue escrito por Keith Galli y se modificó para
+permitir al jugador seleccionar el modo de juego y habilitar la poda alfa-beta.
+
+El programa implementa el juego Conecta Cuatro utilizando la biblioteca pygame.
+Incluye funciones para crear el tablero del juego, soltar piezas,
+verificar un movimiento ganador, evaluar la puntuación de una posición,
+y seleccionar el mejor movimiento utilizando un algoritmo minimax simple
+o un algoritmo minimax más complejo con poda alfa-beta.
+
+El juego se puede jugar en dos modos:
+1. Jugador vs IA: El jugador puede jugar contra la IA.
+2. IA vs IA: Se crean 2 IA que juegan contra ellas (una mas compleja que la otra).
+
+Para iniciar el juego, ejecute el script y seleccione el modo de juego.
+Si la poda alfa-beta está habilitada, la IA utilizará el algoritmo minimax más complejo.
+De lo contrario, utilizará el algoritmo minimax simple.
+
+Si el modo de juego es "Jugador vs IA", el jugador puede soltar una pieza haciendo clic en la columna deseada.
+Si el modo de juego es "IA vs IA", el juego se ejecutará automáticamente y se mostrará el ganador al final.
+    La IA más compleja siempre jugará primero. (color ROJO)
+	La IA menos compleja siempre jugará segundo. (color AMARILLO)
+"""
 import numpy as np
 import random
 import pygame
 import sys
 import math
 
-BLUE = (0,0,255)
-BLACK = (0,0,0)
-RED = (255,0,0)
-YELLOW = (255,255,0)
+# Definición de colores en formato RGB
+BLUE = (0,0,255)  # Azul
+BLACK = (0,0,0)  # Negro
+RED = (255,0,0)  # Rojo
+YELLOW = (255,255,0)  # Amarillo
 
-ROW_COUNT = 6
-COLUMN_COUNT = 7
+# Definición de las dimensiones del tablero de juego
+ROW_COUNT = 6  # Número de filas
+COLUMN_COUNT = 7  # Número de columnas
 
-PLAYER = 0
-AI = 1
+# Definición de los jugadores
+PLAYER = 0  # Jugador humano
+AI = 1  # Inteligencia artificial
 
-EMPTY = 0
-PLAYER_PIECE = 1
-AI_PIECE = 2
+# Definición de los estados de las celdas del tablero
+EMPTY = 0  # Celda vacía
+PLAYER_PIECE = 1  # Ficha del jugador humano
+AI_PIECE = 2  # Ficha de la inteligencia artificial
 
-WINDOW_LENGTH = 4
+# Definición de la longitud de la ventana de juego
+WINDOW_LENGTH = 4  # Longitud de la ventana para verificar las condiciones de victoria
+
 
 def create_board():
 	board = np.zeros((ROW_COUNT,COLUMN_COUNT))
 	return board
 
+
 def drop_piece(board, row, col, piece):
 	board[row][col] = piece
 
+
 def is_valid_location(board, col):
 	return board[ROW_COUNT-1][col] == 0
+
 
 def get_next_open_row(board, col):
 	for r in range(ROW_COUNT):
 		if board[r][col] == 0:
 			return r
 
+
 def print_board(board):
 	print(np.flip(board, 0))
 
+
 def winning_move(board, piece):
-	# Check horizontal locations for win
+    # Verificar las ubicaciones horizontales para ganar
 	for c in range(COLUMN_COUNT-3):
 		for r in range(ROW_COUNT):
 			if board[r][c] == piece and board[r][c+1] == piece and board[r][c+2] == piece and board[r][c+3] == piece:
 				return True
 
-	# Check vertical locations for win
+    # Verificar las ubicaciones verticales para ganar
 	for c in range(COLUMN_COUNT):
 		for r in range(ROW_COUNT-3):
 			if board[r][c] == piece and board[r+1][c] == piece and board[r+2][c] == piece and board[r+3][c] == piece:
 				return True
 
-	# Check positively sloped diaganols
+    # Verificar las diagonales con pendiente positiva
 	for c in range(COLUMN_COUNT-3):
 		for r in range(ROW_COUNT-3):
 			if board[r][c] == piece and board[r+1][c+1] == piece and board[r+2][c+2] == piece and board[r+3][c+3] == piece:
 				return True
 
-	# Check negatively sloped diaganols
+    # Verificar las diagonales con pendiente negativa
 	for c in range(COLUMN_COUNT-3):
 		for r in range(3, ROW_COUNT):
 			if board[r][c] == piece and board[r-1][c+1] == piece and board[r-2][c+2] == piece and board[r-3][c+3] == piece:
 				return True
+
 
 def evaluate_window(window, piece):
 	score = 0
@@ -82,34 +119,36 @@ def evaluate_window(window, piece):
 
 	return score
 
+
 def score_position(board, piece):
 	score = 0
 
-	# Score center column
+    # Puntuar columna central
 	center_array = [int(i) for i in list(board[:, COLUMN_COUNT//2])]
 	center_count = center_array.count(piece)
 	score += center_count * 3
 
-	# Score Horizontal
+    # Puntuar Horizontalmente
 	for r in range(ROW_COUNT):
 		row_array = [int(i) for i in list(board[r,:])]
 		for c in range(COLUMN_COUNT-3):
 			window = row_array[c:c+WINDOW_LENGTH]
 			score += evaluate_window(window, piece)
 
-	# Score Vertical
+    # Puntuar Verticalmente
 	for c in range(COLUMN_COUNT):
 		col_array = [int(i) for i in list(board[:,c])]
 		for r in range(ROW_COUNT-3):
 			window = col_array[r:r+WINDOW_LENGTH]
 			score += evaluate_window(window, piece)
 
-	# Score posiive sloped diagonal
+    # Puntuar diagonal con pendiente positiva
 	for r in range(ROW_COUNT-3):
 		for c in range(COLUMN_COUNT-3):
 			window = [board[r+i][c+i] for i in range(WINDOW_LENGTH)]
 			score += evaluate_window(window, piece)
-
+			
+    # Puntuar diagonal con pendiente negativa
 	for r in range(ROW_COUNT-3):
 		for c in range(COLUMN_COUNT-3):
 			window = [board[r+3-i][c+i] for i in range(WINDOW_LENGTH)]
@@ -117,8 +156,10 @@ def score_position(board, piece):
 
 	return score
 
+
 def is_terminal_node(board):
 	return winning_move(board, PLAYER_PIECE) or winning_move(board, AI_PIECE) or len(get_valid_locations(board)) == 0
+
 
 def complex_minimax(board, depth, alpha, beta, maximizingPlayer):
 	valid_locations = get_valid_locations(board)
@@ -129,9 +170,9 @@ def complex_minimax(board, depth, alpha, beta, maximizingPlayer):
 				return (None, 100000000000000)
 			elif winning_move(board, PLAYER_PIECE):
 				return (None, -10000000000000)
-			else: # Game is over, no more valid moves
+			else:  # El juego ha terminado, no hay más movimientos válidos
 				return (None, 0)
-		else: # Depth is zero
+		else: # pofundidad es cero
 			return (None, score_position(board, AI_PIECE))
 	if maximizingPlayer:
 		value = -math.inf
@@ -149,7 +190,7 @@ def complex_minimax(board, depth, alpha, beta, maximizingPlayer):
 				break
 		return column, value
 
-	else: # Minimizing player
+	else: # Minimizando al jugador
 		value = math.inf
 		column = random.choice(valid_locations)
 		for col in valid_locations:
@@ -175,9 +216,9 @@ def simple_minimax(board, depth, maximizingPlayer):
                 return (None, 100000000000000)
             elif winning_move(board, PLAYER_PIECE):
                 return (None, -10000000000000)
-            else:  # Game is over, no more valid moves
+            else:  # El juego ha terminado, no hay más movimientos válidos
                 return (None, 0)
-        else:  # Depth is zero
+        else:  # pofundidad es cero
             return (None, score_position(board, AI_PIECE))
     if maximizingPlayer:
         value = -math.inf
@@ -191,7 +232,7 @@ def simple_minimax(board, depth, maximizingPlayer):
                 value = new_score
                 column = col
         return column, value
-    else:  # Minimizing player
+    else:  # Minimizando al jugador
         value = math.inf
         column = random.choice(valid_locations)
         for col in valid_locations:
@@ -212,6 +253,7 @@ def get_valid_locations(board):
 			valid_locations.append(col)
 	return valid_locations
 
+
 def pick_best_move(board, piece):
 
 	valid_locations = get_valid_locations(board)
@@ -227,6 +269,7 @@ def pick_best_move(board, piece):
 			best_col = col
 
 	return best_col
+
 
 def draw_board(board):
 	for c in range(COLUMN_COUNT):
@@ -271,6 +314,7 @@ def enable_pruning():
 
 game_mode = select_game_mode()
 
+
 if game_mode == "1":
     pruning_enabled = enable_pruning()
     board = create_board()
@@ -312,7 +356,7 @@ if game_mode == "1":
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
-                # Ask for Player 1 Input
+                # Solicitar entrada del jugador
                 if turn == PLAYER:
                     posx = event.pos[0]
                     col = int(math.floor(posx/SQUARESIZE))
@@ -332,9 +376,9 @@ if game_mode == "1":
                         print_board(board)
                         draw_board(board)
 
-
-        # # Ask for Player 2 Input
+        # Solicitar entrada de IA
         if turn == AI and not game_over:
+			# Solicitar si habilitar la poda alfa-beta
             if pruning_enabled:
                 col, minimax_score = complex_minimax(board, 5, -math.inf, math.inf, True)
             else:
@@ -357,6 +401,7 @@ if game_mode == "1":
 
         if game_over:
             pygame.time.wait(2000)
+			
 else:
     board = create_board()
     print_board(board)
@@ -389,7 +434,7 @@ else:
 
             pygame.display.update()
 
-        # Ask for Player 1 Input
+        # Solicitar entrada de IA con poda alfa-beta
         if turn == PLAYER:
             col, minimax_score = complex_minimax(board, 5, -math.inf, math.inf, True)
             if is_valid_location(board, col):
@@ -410,10 +455,9 @@ else:
                 print_board(board)
                 draw_board(board)
 
-
-        # # Ask for AI without alpha-beta pruning input
+        # Solicitar entrada de IA sin poda alfa-beta
         if turn == AI and not game_over:
-            col, minimax_score = simple_minimax(board, 5, True)
+            col, minimax_score = simple_minimax(board, 3, True)
 			
             if is_valid_location(board, col):
                 row = get_next_open_row(board, col)
@@ -431,4 +475,4 @@ else:
                 turn = turn % 2
 
         if game_over:
-            pygame.time.wait(2000)
+            pygame.time.wait(1500)
