@@ -61,16 +61,6 @@ class ConnectFour:
                 return r
 
 
-    def print_board(self):
-        """
-        Prints the current state of the board.
-
-        Returns:
-            None
-        """
-        print(np.flip(self.board, 0))
-		
-
     def winning_move(self, piece):
         """
         Checks if a player has won the game.
