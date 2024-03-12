@@ -50,7 +50,7 @@ posibles en cada jugada.
 
 ## Referencias
 
-* Wikipedia. (n.d.). Wikipedia. Retrieved from Minimax: [https://en.wikipedia.org/wiki/Minimax#:~:text=Minimax%20is%20used%20in%20zero,maximizing%20one's%20own%20minimum%20gain.](https://en.wikipedia.org/wiki/Minimax#:~:text=Minimax%20is%20used%20in%20zero,maximizing%20one's%20own%20minimum%20gain.)    
+* Wikipedia. (n.d.). Minimax. Retrieved from Wikipedia: [https://en.wikipedia.org/wiki/Minimax#:~:text=Minimax%20is%20used%20in%20zero,maximizing%20one's%20own%20minimum%20gain.](https://en.wikipedia.org/wiki/Minimax#:~:text=Minimax%20is%20used%20in%20zero,maximizing%20one's%20own%20minimum%20gain.)    
 * Geeks for Geeks. (2023, enero 16). Minimax Algorithm in Game Theory | Set 4 (Alpha-Beta Pruning) . Retrieved from Geeks for Geeks: [https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-4-alpha-beta-pruning/](https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-4-alpha-beta-pruning/)  
 * Geeks for Geeks. (2021, octubre 25). Geeks for Geeks. Retrieved from Expectimax Algorithm in Game Theory: [https://www.geeksforgeeks.org/expectimax-algorithm-in-game-theory/)](https://www.geeksforgeeks.org/expectimax-algorithm-in-game-theory/)
 
