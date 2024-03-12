@@ -40,16 +40,16 @@ ROW_COUNT = 6  # Número de filas
 COLUMN_COUNT = 7  # Número de columnas
 
 # Definición de los jugadores
-PLAYER = 0  # Jugador humano
-AI = 1  # Inteligencia artificial
+PLAYER = 0 
+AI = 1
 
 # Definición de los estados de las celdas del tablero
 EMPTY = 0  # Celda vacía
-PLAYER_PIECE = 1  # Ficha del jugador humano
-AI_PIECE = 2  # Ficha de la inteligencia artificial
+PLAYER_PIECE = 1  # Ficha del jugador
+AI_PIECE = 2  # Ficha de la ia
 
 # Definición de la longitud de la ventana de juego
-WINDOW_LENGTH = 4  # Longitud de la ventana para verificar las condiciones de victoria
+WINDOW_LENGTH = 4 
 
 
 def create_board():
@@ -382,7 +382,7 @@ if game_mode == "1":
             if pruning_enabled:
                 col, minimax_score = complex_minimax(board, 5, -math.inf, math.inf, True)
             else:
-                col, minimax_score = simple_minimax(board, 3, True)
+                col, minimax_score = simple_minimax(board, 5, True)
 
             if is_valid_location(board, col):
                 row = get_next_open_row(board, col)
@@ -403,76 +403,82 @@ if game_mode == "1":
             pygame.time.wait(2000)
 			
 else:
-    board = create_board()
-    print_board(board)
-    game_over = False
-    
-    pygame.init()
-
-    SQUARESIZE = 100
-
-    width = COLUMN_COUNT * SQUARESIZE
-    height = (ROW_COUNT+1) * SQUARESIZE
-
-    size = (width, height)
-
-    RADIUS = int(SQUARESIZE/2 - 5)
-
-    screen = pygame.display.set_mode(size)
-    draw_board(board)
-    pygame.display.update()
-
-    myfont = pygame.font.SysFont("monospace", 75)
-
-    turn = random.randint(PLAYER, AI)
-
-    while not game_over:
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-
-            pygame.display.update()
-
-        # Solicitar entrada de IA con poda alfa-beta
-        if turn == PLAYER:
-            col, minimax_score = complex_minimax(board, 5, -math.inf, math.inf, True)
-            if is_valid_location(board, col):
-                row = get_next_open_row(board, col)
-                drop_piece(board, row, col, PLAYER_PIECE)
-
-                if winning_move(board, PLAYER_PIECE):
-                    label = myfont.render("Player 1 wins!!", 1, RED)
-                    screen.blit(label, (40,10))
-                    game_over = True
-
-                print_board(board)
-                draw_board(board)
-
-                turn += 1
-                turn = turn % 2
-
-                print_board(board)
-                draw_board(board)
-
-        # Solicitar entrada de IA sin poda alfa-beta
-        if turn == AI and not game_over:
-            col, minimax_score = simple_minimax(board, 3, True)
+	move_count = 0
+	board = create_board()
+	
+	print_board(board)
+	
+	game_over = False
+	pygame.init()
+	
+	SQUARESIZE = 100
+	
+	width = COLUMN_COUNT * SQUARESIZE
+	height = (ROW_COUNT+1) * SQUARESIZE
+	
+	size = (width, height)
+	
+	RADIUS = int(SQUARESIZE/2 - 5)
+	
+	screen = pygame.display.set_mode(size)
+	
+	draw_board(board)
+	pygame.display.update()
+	
+	myfont = pygame.font.SysFont("monospace", 75)
+	turn = random.randint(PLAYER, AI)
+	
+	while not game_over:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				sys.exit()
+				
+			pygame.display.update()
 			
-            if is_valid_location(board, col):
-                row = get_next_open_row(board, col)
-                drop_piece(board, row, col, AI_PIECE)
-
-                if winning_move(board, AI_PIECE):
-                    label = myfont.render("Player 2 wins!!", 1, YELLOW)
-                    screen.blit(label, (40,10))
-                    game_over = True
-
-                print_board(board)
-                draw_board(board)
-
-                turn += 1
-                turn = turn % 2
-
-        if game_over:
-            pygame.time.wait(1500)
+        # Solicitar entrada de IA con poda alfa-beta
+		if turn == PLAYER:
+			if move_count == 0:
+				col = random.choice([0, 1, 2, 3, 4, 5, 6])
+			else:
+				col, minimax_score = complex_minimax(board, 5, -math.inf, math.inf, True)
+				
+			if is_valid_location(board, col):
+				row = get_next_open_row(board, col)
+				drop_piece(board, row, col, PLAYER_PIECE)
+				move_count += 1
+				
+				if winning_move(board, PLAYER_PIECE):
+					label = myfont.render("Player 1 wins!!", 1, RED)
+					screen.blit(label, (40,10))
+					game_over = True
+					
+				print_board(board)
+				draw_board(board)
+				
+				turn += 1
+				turn = turn % 2
+				
+				print_board(board)
+				draw_board(board)
+				
+		# Solicitar entrada de IA sin poda alfa-beta
+		if turn == AI and not game_over:
+			col, minimax_score = simple_minimax(board, 5, False)
+			
+			if is_valid_location(board, col):
+				row = get_next_open_row(board, col)
+				drop_piece(board, row, col, AI_PIECE)
+				
+				if winning_move(board, AI_PIECE):
+					label = myfont.render("Player 2 wins!!", 1, YELLOW)
+					screen.blit(label, (40,10))
+					game_over = True
+					
+				print_board(board)
+				draw_board(board)
+				
+				turn += 1
+				turn = turn % 2
+				
+		if game_over:
+			pygame.time.wait(2000)
